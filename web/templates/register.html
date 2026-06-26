@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro - Support Desk</title>
+  <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Cadastro</h1>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Nome" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button type="submit">Cadastrar</button>
+    </form>
+    <p id="message"></p>
+    <a href="/login">Já tem conta? Entrar</a>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msgEl = document.getElementById('message');
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          msgEl.textContent = data.error;
+          msgEl.style.color = 'red';
+          return;
+        }
+
+        msgEl.textContent = 'Cadastro realizado! Redirecionando para login...';
+        msgEl.style.color = 'green';
+        setTimeout(() => window.location.href = '/login', 1500);
+      } catch (err) {
+        msgEl.textContent = 'Erro de conexão com o servidor';
+        msgEl.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

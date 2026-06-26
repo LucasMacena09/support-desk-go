@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Chamado - Support Desk</title>
+  <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Meu Chamado</h1>
+    <div id="setup">
+      <input type="text" id="subject" placeholder="Assunto do chamado">
+      <button id="createTicketBtn">Abrir chamado</button>
+    </div>
+
+    <div id="chatBox" style="display:none;">
+      <div id="messages"></div>
+      <input type="text" id="messageInput" placeholder="Digite sua mensagem">
+      <button id="sendBtn">Enviar</button>
+    </div>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+
+    let ticketId = null;
+
+    document.getElementById('createTicketBtn').addEventListener('click', async () => {
+      const subject = document.getElementById('subject').value;
+      const msgEl = document.getElementById('message');
+
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ subject })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        msgEl.textContent = data.error;
+        msgEl.style.color = 'red';
+        return;
+      }
+
+      ticketId = data.id;
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('chatBox').style.display = 'block';
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+      const input = document.getElementById('messageInput');
+      const content = input.value;
+      const msgEl = document.getElementById('message');
+
+      const res = await fetch(`/api/tickets/${ticketId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ content })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        msgEl.textContent = data.error;
+        msgEl.style.color = 'red';
+        return;
+      }
+
+      const messagesEl = document.getElementById('messages');
+      messagesEl.innerHTML += `<p><strong>Você:</strong> ${data.user_message.content}</p>`;
+      messagesEl.innerHTML += `<p><strong>Bot:</strong> ${data.bot_message.content}</p>`;
+      input.value = '';
+      msgEl.textContent = '';
+    });
+  </script>
+</body>
+</html>
