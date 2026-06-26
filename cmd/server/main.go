@@ -17,10 +17,12 @@ import (
 func main() {
 	cfg := config.Load()
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisAddr,
-		Password: cfg.RedisPassword,
-	})
+	opt, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		log.Fatalf("erro ao interpretar a URL do Redis: %v", err)
+	}
+
+	rdb := redis.NewClient(opt)
 
 	ctx := context.Background()
 	if err := rdb.Ping(ctx).Err(); err != nil {
@@ -43,7 +45,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Arquivos estáticos (css/js)
+	// Arquivos estáticos (css/js) — registrado com método explícito
 	fs := http.FileServer(http.Dir("./web/static"))
 	mux.Handle("GET /static/", http.StripPrefix("/static/", fs))
 

@@ -8,10 +8,9 @@ import (
 )
 
 type Config struct {
-	Port          string
-	RedisAddr     string
-	RedisPassword string
-	JWTSecret     string
+	Port      string
+	RedisURL  string
+	JWTSecret string
 }
 
 func Load() *Config {
@@ -20,10 +19,9 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:          getEnv("PORT", "8080"),
-		RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
-		JWTSecret:     getEnv("JWT_SECRET", ""),
+		Port:      getEnv("PORT", "8080"),
+		RedisURL:  getEnv("REDIS_URL", "redis://localhost:6379"),
+		JWTSecret: getEnv("JWT_SECRET", ""),
 	}
 }
 
